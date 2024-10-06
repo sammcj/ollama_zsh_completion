@@ -20,6 +20,39 @@ source ~/.zshrc
 
 ## Completion
 
-Command completion for all `ollama` cli commands, [see the original gist for more info](https://gist.github.com/obeone/9313811fd61a7cbb843e0001a4434c58)
+Command completion for all `ollama` cli commands, [see the original gist for more info](https://gist.github.com/obeone/9313811fd61a7cbb843e0001a4434c58). 
 
+Below is a summary:
+
+```sh
+ollama [TAB]
+cp      -- Copy a model
+create  -- Create a model from a Modelfile
+help    -- Help about any command
+list    -- List models
+pull    -- Pull a model from a registry
+push    -- Push a model to a registry
+rm      -- Remove a model
+run     -- Run a model
+serve   -- Start ollama
+show    -- Show information for a model
+```
+
+```sh
+ollama create [TAB] -f [TAB] files...
+```
+
+```sh
+ollama push|pull|cp|run|rm|show [TAB]
+   <list of current models>
+```
+(TODO/FIXME not sure why we'd want this action for pull.)
+
+```sh
+ollama serve --
+--host        -- Specify the host and port
+--keep-alive  -- Duration to keep models in memory
+--models      -- Path to the models directory
+--origins     -- Set allowed origins
+```
 
