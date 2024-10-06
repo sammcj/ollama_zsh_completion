@@ -45,8 +45,9 @@ ollama create [TAB] -f [TAB] files...
 ```sh
 ollama push|pull|cp|run|rm|show [TAB]
    <list of current models>
+
+# (TODO/FIXME not sure why we'd want this action for pull.)
 ```
-(TODO/FIXME not sure why we'd want this action for pull.)
 
 ```sh
 ollama serve --
