@@ -6,13 +6,13 @@ The plugin is based on [Obeone's Gist](https://gist.github.com/obeone/9313811fd6
 
 With [Antidote](https://github.com/mattmc3/antidote) installation is as simple as editing my `~/.zsh_plugins.txt` file and adding:
 
-```sh
+```txt
 ocodo/ollama_zsh_completion
 ```
 
 Then reload the shell (I just start a new terminal window) but you can also:
 
-```sh 
+```sh
 source ~/.zshrc
 ```
 
@@ -24,7 +24,7 @@ Command completion for all `ollama` cli commands, [see the original gist for mor
 
 Below is a summary:
 
-```sh
+```txt
 ollama [TAB]
 cp      -- Copy a model
 create  -- Create a model from a Modelfile
@@ -44,7 +44,7 @@ ollama create [TAB] -f [TAB] files...
 
 ```sh
 ollama push|pull|cp|run|rm|show [TAB]
-   <list of current models>
+    <list of current models>
 
 # (TODO/FIXME not sure why we'd want this action for pull.)
 ```
@@ -57,3 +57,9 @@ ollama serve --
 --origins     -- Set allowed origins
 ```
 
+```sh
+ollama help [TAB]
+    <nothing>
+
+# TODO/FIXME - this should complete the list of commands for help
+```
