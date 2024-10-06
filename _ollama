@@ -104,7 +104,7 @@ _ollama() {
                         _message "enter prompt"
                     fi
                 ;;
-                pull|push)
+                push)
                     _arguments \
                         '--insecure[Use an insecure registry]' \
                         '*::model:->model'
@@ -128,7 +128,7 @@ _ollama() {
                     fi
                 ;;
                 help)
-                    _message "no additional arguments for help"
+                    _describe -t commands 'ollama command' commands
                 ;;
             esac
         ;;
