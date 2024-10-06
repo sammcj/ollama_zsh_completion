@@ -25,7 +25,7 @@
 # Function to fetch and return model names from 'ollama list'
 _fetch_ollama_models() {
     local -a models
-    local output="$(ollama list 2>/dev/null | sed 's/:/\\:/g')"  # Escape semicolons for zsh
+    local output="$(ollama list 2>/dev/null | sed 's/:/\\:/g')"  # Escape colons for zsh
     if [[ -z "$output" ]]; then
         _message "no models available or 'ollama list' failed"
         return 1
@@ -36,6 +36,34 @@ _fetch_ollama_models() {
         return 1
     fi
     _describe 'model names' models
+}
+
+ollama_library_models() {
+    local cache_age
+    local cached_file=~/.cache/ollama_library_models.cache
+    local timeout=3600
+    local url='https://ollama.com/library'
+
+    if [[ -f "$cached_file" ]];then
+       cache_age=$(( $(date +%s) - $(stat -c "%Y" "${cached_file}") ))
+    fi
+
+    if [[ ! -f "${cached_file}" || ${cache_age} > ${timeout} ]]; then
+        cleaned_models=$(htmlq -u ${url} 'a[href*="/library"]' -a href -s '\n')
+        if [ $? -eq 0 ]; then
+            echo "${cleaned_models}" | sed 's|^/library/||' | grep -v '/library' > "${cached_file}"
+        fi
+    else
+        cleaned_models=$(cat "${cached_file}")
+    fi
+
+    local -a models=("${(@f)"$(<$cached_file)"}")
+    print -r -- ${(qq)models}
+}
+
+_ollama_library_models() {
+    local -a models=("${(@Q)${(z)$(ollama_library_models)}}")
+    _describe models 'models' models
 }
 
 # Main completion function
@@ -106,6 +134,13 @@ _ollama() {
                         _fetch_ollama_models
                     fi
                 ;;
+                pull)
+                    _arguments \
+                        '*::model:->model'
+                    if [[ $state == model ]]; then
+                        _ollama_library_models
+                    fi
+                    ;;
                 list)
                     _message "no additional arguments for list"
                 ;;
