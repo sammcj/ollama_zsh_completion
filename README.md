@@ -43,10 +43,17 @@ ollama create [TAB] -f [TAB] files...
 ```
 
 ```sh
-ollama push|pull|cp|run|rm|show [TAB]
-    <list of current models>
+ollama push|cp|run|rm|show [TAB]
+    <list of local models>
 
 # (TODO/FIXME not sure why we'd want this action for pull.)
+```
+
+```sh
+ollama pull[TAB]
+    <list of ollama core models>
+
+Note: https:/ollama.com/library (cached to ~/.cache/ollama_library_models.cache, 1hr TTL)
 ```
 
 ```sh
