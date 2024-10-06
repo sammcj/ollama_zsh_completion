@@ -22,8 +22,6 @@
 # - This configuration file presupposes the utilization of Zsh as your primary shell environment.
 # - It is crucial to restart your zsh session subsequent to alterations made to your fpath to ensure the updates are effectively recognized.
 
-
-
 # Function to fetch and return model names from 'ollama list'
 _fetch_ollama_models() {
     local -a models
@@ -40,12 +38,20 @@ _fetch_ollama_models() {
     _describe 'model names' models
 }
 
-
-
-
 # Main completion function
 _ollama() {
-    local -a commands
+    local -a commands=(
+        'serve:Start ollama'
+        'create:Create a model from a Modelfile'
+        'show:Show information for a model'
+        'run:Run a model'
+        'pull:Pull a model from a registry'
+        'push:Push a model to a registry'
+        'list:List models'
+        'cp:Copy a model'
+        'rm:Remove a model'
+        'help:Help about any command'
+    )
 
     _arguments -C \
         '1: :->command' \
@@ -53,18 +59,6 @@ _ollama() {
 
     case $state in
         command)
-            commands=(
-                'serve:Start ollama'
-                'create:Create a model from a Modelfile'
-                'show:Show information for a model'
-                'run:Run a model'
-                'pull:Pull a model from a registry'
-                'push:Push a model to a registry'
-                'list:List models'
-                'cp:Copy a model'
-                'rm:Remove a model'
-                'help:Help about any command'
-            )
             _describe -t commands 'ollama command' commands
         ;;
         args)
@@ -128,7 +122,7 @@ _ollama() {
                     fi
                 ;;
                 help)
-                    _describe -t commands 'ollama command' commands
+                    _describe -t commands '' commands
                 ;;
             esac
         ;;
