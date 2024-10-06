@@ -59,7 +59,14 @@ ollama serve --
 
 ```sh
 ollama help [TAB]
-    <nothing>
-
-# (TODO/FIXME - this should complete the list of commands for help)
+cp      -- Copy a model
+create  -- Create a model from a Modelfile
+help    -- Help about any command
+list    -- List models
+pull    -- Pull a model from a registry
+push    -- Push a model to a registry
+rm      -- Remove a model
+run     -- Run a model
+serve   -- Start ollama
+show    -- Show information for a model
 ```
