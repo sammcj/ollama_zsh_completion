@@ -61,5 +61,5 @@ ollama serve --
 ollama help [TAB]
     <nothing>
 
-# TODO/FIXME - this should complete the list of commands for help
+# (TODO/FIXME - this should complete the list of commands for help)
 ```
