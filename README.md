@@ -45,8 +45,6 @@ ollama create [TAB] -f [TAB] files...
 ```sh
 ollama push|cp|run|rm|show [TAB]
     <list of local models>
-
-# (TODO/FIXME not sure why we'd want this action for pull.)
 ```
 
 ```sh
@@ -57,7 +55,7 @@ Note: https:/ollama.com/library (cached to ~/.cache/ollama_library_models.cache,
 ```
 
 ```sh
-ollama serve --
+ollama serve [TAB]
 --host        -- Specify the host and port
 --keep-alive  -- Duration to keep models in memory
 --models      -- Path to the models directory
