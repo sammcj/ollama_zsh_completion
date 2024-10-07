@@ -1,4 +1,4 @@
-# Ollama zsh completion plugin for Antidote
+# Ollama zsh completion plugin
 
 The plugin is based on [Obeone's Gist](https://gist.github.com/obeone/9313811fd61a7cbb843e0001a4434c58) 
 
