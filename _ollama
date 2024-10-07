@@ -1,28 +1,49 @@
 #compdef ollama
 
-# Purpose:
-# This script file `_ollama` should be placed in your fpath to provide zsh completions functionality for ollama commands.
-# It utilizes zsh's native completion system by defining specific completion behaviors tailored to ollama commands.
-
-# Installation:
-# 1. Check your current fpath by executing: `echo $fpath` in your zsh shell.
-# 2. To introduce a new directory to fpath, edit your .zshrc file:
-#    Example: `fpath=($HOME/.zsh-completions $fpath)`
-# 3. Store this script file in the directory you have added to your fpath.
-# 4. For a system-wide installation on Linux:
-#    Download and deploy this script with the following command:
-#    sudo wget -O /usr/share/zsh/site-functions/_ollama https://gist.githubusercontent.com/obeone/9313811fd61a7cbb843e0001a4434c58/raw/_ollama.zsh
-
 # Contributions:
 # Principal contributions by:
 # - ChatGPT [ZSH Expert](https://chatgpt.com/g/g-XczdbjXSW-zsh-expert) as the primary creator.
 # - Guidance and revisions by [obeone](https://github.com/obeone).
+# - Conversion to zsh plugin, refinements and extensions by [jasonm23](https://github.com/jason23)
 
-# Note:
-# - This configuration file presupposes the utilization of Zsh as your primary shell environment.
-# - It is crucial to restart your zsh session subsequent to alterations made to your fpath to ensure the updates are effectively recognized.
+# Fetch online ollama library models
+fetch_ollama_library_models() {
+    python3 --version > /dev/null 2>&1
+    if [ $? -eq 0 ];then
+        python3 ollama_library_models.py
+    fi
+}
 
-# Function to fetch and return model names from 'ollama list'
+# Cache online ollama library models
+cached_models() {
+    local cache_age
+    local cached_file=~/.cache/ollama_library_models.cache
+    local timeout=3600 # 1hr cache
+
+    if [[ -f "$cached_file" ]];then
+       cache_age=$(( $(date +%s) - $(stat -c "%Y" "${cached_file}") ))
+    fi
+
+    if [[ ! -f "${cached_file}" || ${cache_age} > ${timeout} ]]; then
+        cleaned_models=$(fetch_ollama_library_models)
+        if [ $? -eq 0 ]; then
+            echo "${cleaned_models}" > "${cached_file}"
+        fi
+    else
+        cleaned_models=$(cat "${cached_file}")
+    fi
+
+    local -a models=("${(@f)"$(<$cached_file)"}")
+    print -r -- ${(qq)models}
+}
+
+# Pass ollama library models to completion
+_ollama_library_models() {
+    local -a models=("${(@Q)${(z)$(cached_models)}}")
+    _describe models 'models' models
+}
+
+# Fetch local models
 _fetch_ollama_models() {
     local -a models
     local output="$(ollama list 2>/dev/null | sed 's/:/\\:/g')"  # Escape colons for zsh
@@ -36,34 +57,6 @@ _fetch_ollama_models() {
         return 1
     fi
     _describe 'model names' models
-}
-
-ollama_library_models() {
-    local cache_age
-    local cached_file=~/.cache/ollama_library_models.cache
-    local timeout=3600
-    local url='https://ollama.com/library'
-
-    if [[ -f "$cached_file" ]];then
-       cache_age=$(( $(date +%s) - $(stat -c "%Y" "${cached_file}") ))
-    fi
-
-    if [[ ! -f "${cached_file}" || ${cache_age} > ${timeout} ]]; then
-        cleaned_models=$(htmlq -u ${url} 'a[href*="/library"]' -a href -s '\n')
-        if [ $? -eq 0 ]; then
-            echo "${cleaned_models}" | sed 's|^/library/||' | grep -v '/library' > "${cached_file}"
-        fi
-    else
-        cleaned_models=$(cat "${cached_file}")
-    fi
-
-    local -a models=("${(@f)"$(<$cached_file)"}")
-    print -r -- ${(qq)models}
-}
-
-_ollama_library_models() {
-    local -a models=("${(@Q)${(z)$(ollama_library_models)}}")
-    _describe models 'models' models
 }
 
 # Main completion function
