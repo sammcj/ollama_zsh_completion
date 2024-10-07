@@ -16,6 +16,17 @@ Then reload the shell (I just start a new terminal window) but you can also:
 source ~/.zshrc
 ```
 
+# Htmlq
+
+if htmlq is installed, completion on `ollama pull[TAB]` can fetch the ollama library models list. 
+
+install htmlq:
+
+```sh 
+pip install htmlq
+```
+
+
 - - -
 
 ## Completion
