@@ -10,7 +10,8 @@
 fetch_ollama_library_models() {
     python3 --version > /dev/null 2>&1
     if [ $? -eq 0 ];then
-        python3 ollama_library_models.py
+        PLUGIN_DIR=$(dirname "$0")
+        python3 "$PLUGIN_DIR/ollama_library_models.py"
     fi
 }
 
