@@ -1,2 +1,1 @@
-# Required by oh-my-zsh
-# Nothing to do
+source ${0:A:h}/_ollama
