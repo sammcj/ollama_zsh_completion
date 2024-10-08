@@ -4,17 +4,20 @@ The plugin is based on [Obeone's Gist](https://gist.github.com/obeone/9313811fd6
 
 # installation
 
-With [Antidote](https://github.com/mattmc3/antidote) installation is as simple as editing my `~/.zsh_plugins.txt` file and adding:
+I use Antidote for zsh plugins, but if you use a different system for managing your zsh, it's basically the same, just add `ocodo/ollama_zsh_completion` to your plugins list and reload your shell.
+
+With [Antidote](https://github.com/mattmc3/antidote) installation is as simple as editing your `~/.zsh_plugins.txt` file and adding:
 
 ```txt
 ocodo/ollama_zsh_completion
 ```
 
-Then reload the shell (I just start a new terminal window) but you can also:
-
 ```sh
 source ~/.zshrc
 ```
+
+Or just start a new shell.  Update plugins using `antidote update`
+
 - - -
 
 ## Completion
