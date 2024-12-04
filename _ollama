@@ -145,6 +145,7 @@ _ollama() {
                         '--format[Specify the response format]:format:' \
                         '--insecure[Use an insecure registry]' \
                         '--nowordwrap[Disable word wrap]' \
+                        '--keepalive[Duration to keep a model loaded (e.g. 5m)]:duration:' \
                         '--verbose[Show verbose output]' \
                         '*::model and prompt:->model_and_prompt'
                     if [[ $state == model_and_prompt ]]; then
