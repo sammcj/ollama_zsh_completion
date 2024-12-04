@@ -45,9 +45,16 @@ cached_models() {
     local cache_age
     local cached_file=~/.cache/ollama_library_models.cache
     local timeout=3600 # 1hr cache
+    local current_time=$(date +%s)
 
-    if [[ -f "$cached_file" ]];then
-       cache_age=$(( $(date +%s) - $(stat -c "%Y" "${cached_file}") ))
+    if [[ -f "$cached_file" ]]; then
+        # Cross-platform way to get file modification time in seconds since epoch
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            local mod_time=$(stat -f %m "$cached_file")
+        else
+            local mod_time=$(stat -c %Y "$cached_file")
+        fi
+        cache_age=$(( current_time - mod_time ))
     fi
 
     if [[ ! -f "${cached_file}" || ${cache_age} > ${timeout} ]]; then
