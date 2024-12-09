@@ -11,7 +11,7 @@ fetch_ollama_library_models() {
     python3 --version > /dev/null 2>&1
     if [ $? -eq 0 ];then
         python3 -c "
-import requests
+from urllib.request import urlopen
 from html.parser import HTMLParser
 
 class ScrapeOllamaLibraries(HTMLParser):
@@ -27,16 +27,15 @@ class ScrapeOllamaLibraries(HTMLParser):
                 self.links.append(processed_link)
 
 url = 'https://ollama.com/library'
-response = requests.get(url)
-
-if response.status_code == 200:
-    html_content = response.text
-    parser = ScrapeOllamaLibraries()
-    parser.feed(html_content)
-    result = '\n'.join(parser.links)
-    print(result)
-else:
-  print(f'Failed to fetch model list from ollama.com [HTTP Status {response.status_code}]')"
+try:
+    with urlopen(url) as response:
+        html_content = response.read().decode('utf-8')
+        parser = ScrapeOllamaLibraries()
+        parser.feed(html_content)
+        result = '\n'.join(parser.links)
+        print(result)
+except Exception as e:
+    print(f'Failed to fetch model list from ollama.com [{str(e)}]')"
     fi
 }
 
@@ -45,16 +44,13 @@ cached_models() {
     local cache_age
     local cached_file=~/.cache/ollama_library_models.cache
     local timeout=3600 # 1hr cache
-    local current_time=$(date +%s)
 
-    if [[ -f "$cached_file" ]]; then
-        # Cross-platform way to get file modification time in seconds since epoch
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            local mod_time=$(stat -f %m "$cached_file")
-        else
-            local mod_time=$(stat -c %Y "$cached_file")
-        fi
-        cache_age=$(( current_time - mod_time ))
+    if [[ -f "$cached_file" ]];then
+       if [[ "$OSTYPE" == "darwin"* ]]; then
+           cache_age=$(( $(date +%s) - $(stat -f %m "${cached_file}") ))
+       else
+           cache_age=$(( $(date +%s) - $(stat -c "%Y" "${cached_file}") ))
+       fi
     fi
 
     if [[ ! -f "${cached_file}" || ${cache_age} > ${timeout} ]]; then
