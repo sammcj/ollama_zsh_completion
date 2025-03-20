@@ -36,10 +36,10 @@ Then edit your `.zshrc` and add `ollama` to the list of plugins:
 plugins=(... ollama)
 ```
 
-Reload your shell:
+Reload your omz:
 
 ```sh
-source ~/.zshrc
+omz reload
 ```
 
 ---
