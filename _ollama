@@ -62,7 +62,7 @@ cached_models() {
         cleaned_models=$(cat "${cached_file}")
     fi
 
-    local -a models=("${(@f)"$(<$cached_file)"}")
+    local -a models=("${(@f)"$(<${cached_file})"}")
     print -r -- ${(qq)models}
 }
 
@@ -88,6 +88,42 @@ _fetch_ollama_models() {
     _describe 'model names' models
 }
 
+# Fetch running models for 'ollama stop'
+_fetch_ollama_running_models() {
+    local -a models
+    local output="$(ollama ps 2>/dev/null | sed 's/:/\\:/g')"
+    if [[ -z "$output" ]]; then
+        _message "no running models found"
+        return 1
+    fi
+    models=("${(@f)$(echo "$output" | awk 'NR>1 {print $1}')}")
+    if [[ ${#models} -eq 0 ]]; then
+        _message "no running models found"
+        return 1
+    fi
+    _describe 'running models' models
+}
+
+# Quantization options
+_ollama_quantizations() {
+    local -a quantizations=(
+        'q4_0:Supported Quantization'
+        'q4_1:Supported Quantization'
+        'q5_0:Supported Quantization'
+        'q5_1:Supported Quantization'
+        'q8_0:Supported Quantization'
+        'q3_K_S:K-means Quantization'
+        'q3_K_M:K-means Quantization'
+        'q3_K_L:K-means Quantization'
+        'q4_K_S:K-means Quantization'
+        'q4_K_M:K-means Quantization'
+        'q5_K_S:K-means Quantization'
+        'q5_K_M:K-means Quantization'
+        'q6_K:K-means Quantization'
+    )
+    _describe 'quantization levels' quantizations
+}
+
 # Main completion function
 _ollama() {
     local -a commands=(
@@ -95,15 +131,19 @@ _ollama() {
         'create:Create a model from a Modelfile'
         'show:Show information for a model'
         'run:Run a model'
+        'stop:Stop a running model'
         'pull:Pull a model from a registry'
         'push:Push a model to a registry'
         'list:List models'
+        'ps:List running models'
         'cp:Copy a model'
         'rm:Remove a model'
         'help:Help about any command'
     )
 
     _arguments -C \
+        '--help[Help for ollama]' \
+        '--version[Show version information]' \
         '1: :->command' \
         '*:: :->args'
 
@@ -114,77 +154,92 @@ _ollama() {
         args)
             case $words[1] in
                 serve)
-                    _arguments \
-                        '--host[Specify the host and port]:host and port:' \
-                        '--origins[Set allowed origins]:origins:' \
-                        '--models[Path to the models directory]:path:_directories' \
-                        '--keep-alive[Duration to keep models in memory]:duration:'
+                    _arguments '--help[help for serve]'
                 ;;
                 create)
                     _arguments \
-                        '-f+[Specify the file name]:file:_files'
+                        '-f+[Name of the Modelfile (default "Modelfile")]:file:_files' \
+                        '-q+[Quantize model to this level (e.g. q4_0)]:quantization:_ollama_quantizations' \
+                        '--help[help for create]'
                 ;;
                 show)
-                    _arguments \
-                        '--license[Show license of a model]' \
-                        '--modelfile[Show Modelfile of a model]' \
-                        '--parameters[Show parameters of a model]' \
-                        '--system[Show system message of a model]' \
-                        '--template[Show template of a model]' \
-                        '*::model:->model'
-                    if [[ $state == model ]]; then
+                    if (( CURRENT == 2 )); then
+                        _arguments \
+                            '--license[Show license of a model]' \
+                            '--modelfile[Show Modelfile of a model]' \
+                            '--parameters[Show parameters of a model]' \
+                            '--system[Show system message of a model]' \
+                            '--template[Show template of a model]' \
+                            '-v[Show detailed model information]' \
+                            '--verbose[Show detailed model information]' \
+                            '--help[help for show]'
+                    else
                         _fetch_ollama_models
                     fi
                 ;;
                 run)
                     _arguments \
-                        '--format[Specify the response format]:format:' \
+                        '--format+[Response format (e.g. json)]:format:' \
                         '--insecure[Use an insecure registry]' \
-                        '--nowordwrap[Disable word wrap]' \
-                        '--keepalive[Duration to keep a model loaded (e.g. 5m)]:duration:' \
-                        '--verbose[Show verbose output]' \
+                        '--keepalive+[Duration to keep a model loaded (e.g. 5m)]:duration:' \
+                        '--nowordwrap[Don''t wrap words to the next line automatically]' \
+                        '--verbose[Show timings for response]' \
+                        '--help[help for run]' \
                         '*::model and prompt:->model_and_prompt'
                     if [[ $state == model_and_prompt ]]; then
                         _fetch_ollama_models
                         _message "enter prompt"
                     fi
                 ;;
-                push)
-                    _arguments \
-                        '--insecure[Use an insecure registry]' \
-                        '*::model:->model'
+                stop)
+                    _arguments '--help[help for stop]' '*::model:->model'
                     if [[ $state == model ]]; then
-                        _fetch_ollama_models
+                        _fetch_ollama_running_models
                     fi
                 ;;
                 pull)
                     _arguments \
+                        '--insecure[Use an insecure registry]' \
+                        '--help[help for pull]' \
                         '*::model:->model'
                     if [[ $state == model ]]; then
                         _ollama_library_models
                     fi
-                    ;;
+                ;;
+                push)
+                    _arguments \
+                        '--insecure[Use an insecure registry]' \
+                        '--help[help for push]' \
+                        '*::model:->model'
+                    if [[ $state == model ]]; then
+                        _fetch_ollama_models
+                    fi
+                ;;
                 list)
-                    _message "no additional arguments for list"
+                    _arguments '--help[help for list]'
+                ;;
+                ps)
+                    _arguments '--help[help for ps]'
                 ;;
                 cp)
-                    _arguments \
-                        '1:source model:_fetch_ollama_models' \
-                        '2:target model:_fetch_ollama_models'
+                    _arguments '--help[help for cp]' '1:SOURCE model:->model' '2:DESTINATION model:'
+                    if [[ $state == model ]]; then
+                        _fetch_ollama_models
+                    fi
                 ;;
                 rm)
-                    _arguments \
-                        '*::models:->models'
-                    if [[ $state == models ]]; then
+                    _arguments '--help[help for rm]' '*:model:->model'
+                    if [[ $state == model ]]; then
                         _fetch_ollama_models
                     fi
                 ;;
                 help)
-                    _describe -t commands '' commands
+                    _arguments '--help[help for help]' '1:command:'
                 ;;
             esac
         ;;
     esac
 }
 
-_ollama
+_ollama "$@"
+
